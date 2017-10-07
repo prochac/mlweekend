@@ -4,9 +4,11 @@
 import click
 import grequests
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib import pylab
-from _tkinter import TclError
+
+matplotlib.use('Agg')
 
 API_URL = "http://165.227.157.145:8080/api/do_measurement?x={x}"
 DEFAULT_START_X = -100
@@ -17,7 +19,6 @@ DEFAULT_DEGREE = 4
 
 
 def get_data() -> np.ndarray:
-    progress = 0
     urls = list()
     for x_ in np.linspace(DEFAULT_START_X, DEFAULT_END_X, DEFAULT_SCALE):
         urls.extend([API_URL.format(x=x_)] * DEFAULT_ACCURACY)
@@ -33,7 +34,7 @@ def get_data() -> np.ndarray:
 
 
 @click.command()
-@click.option('--to-file', 'to_file', type=click.Path())
+@click.option('--to-file', 'to_file', type=click.Path(), default="graph.png")
 @click.option('--from', 'from_', type=float, prompt='Enter the start of the measurement', default=DEFAULT_START_X)
 @click.option('--to', 'to', type=float, prompt='Enter the end of the measurement', default=DEFAULT_END_X)
 @click.option('--scale', 'scale', type=int, prompt='Enter the scale (number of measured values)', default=DEFAULT_SCALE)
@@ -63,25 +64,21 @@ def main(from_: int, to: int, scale: int, accuracy: int, degree: int, to_file: s
     formula = np.poly1d(coefficients)
 
     print("f(y)=\n", formula)
+    with open('formula.txt', 'w') as f:
+        f.write(str(formula))
 
     x_fit = np.linspace(x[0], x[-1], 50)
     y_fit = formula(x_fit)
 
-    try:
-        fig = plt.figure()
-        ax = fig.gca()
-        fig.suptitle('Secret mathematical formula')
-        plt.xlabel('x')
-        plt.ylabel('y')
+    fig = plt.figure()
+    ax = fig.gca()
+    fig.suptitle('Secret mathematical formula')
+    plt.xlabel('x')
+    plt.ylabel('y')
 
-        ax.plot(x, y, 'o', x_fit, y_fit)
-        fig.canvas.draw()
-        if to_file is not None:
-            pylab.savefig(to_file)
-        else:
-            plt.show()
-    except TclError as err:
-        print(err)
+    ax.plot(x, y, 'o', x_fit, y_fit)
+    fig.canvas.draw()
+    pylab.savefig(to_file)
 
 
 if __name__ == '__main__':
