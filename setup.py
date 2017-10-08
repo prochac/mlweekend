@@ -14,6 +14,5 @@ setup(name='mlweekend',
           'numpy==1.13.3',
           'matplotlib==2.0.2',
           'grequests==0.3.0',
-          'click==6.7',
       ],
       )
