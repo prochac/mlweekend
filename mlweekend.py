@@ -17,22 +17,6 @@ DEFAULT_SCALE = 101
 DEFAULT_ACCURACY = 10
 DEFAULT_DEGREE = 4
 
-
-def get_data() -> np.ndarray:
-    urls = list()
-    for x_ in np.linspace(DEFAULT_START_X, DEFAULT_END_X, DEFAULT_SCALE):
-        urls.extend([API_URL.format(x=x_)] * DEFAULT_ACCURACY)
-
-    rs = (grequests.get(u) for u in urls)
-    response = [
-        (res.json()["data"]["x"], res.json()["data"]["y"])
-        for res in grequests.map(rs)
-        if res.json()["data"]["y"] is not None
-    ]
-
-    return np.array(response)
-
-
 @click.command()
 @click.option('--to-file', 'to_file', type=click.Path(), default="graph.png")
 @click.option('--from', 'from_', type=float, prompt='Enter the start of the measurement', default=DEFAULT_START_X)
